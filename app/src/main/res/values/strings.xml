@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">MExplore</string>
+    <string name="setting">设置</string>
+    <string name="url">SimpleURI</string>
+    <string name="local_storage">本地存储</string>
+    <string name="network_storage">网络存储</string>
+    <string name="network_url">网络链接</string>
+    <string name="play">播放</string>
+    <string name="add_network_storage">添加网络存储</string>
+    <string name="confirm">确定</string>
+    <string name="cancel">取消</string>
+    <string name="paste_cancel">粘贴取消</string>
+    <string name="delete">删除</string>
+    <string name="files">个文件</string>
+    <string name="rename">重命名</string>
+    <string name="sort">排序</string>
+    <string name="sel_outer_spu">选择外部字幕</string>
+    <string name="sort_by_name">按名称</string>
+    <string name="sort_by_size">按大小</string>
+    <string name="sort_by_date">按日期</string>
+    <string name="network_name">网络名称</string>
+    <string name="network_host">网络主机</string>
+    <string name="network_port">网络端口</string>
+    <string name="network_proto">网络协议</string>
+    <string name="network_path">网络路径</string>
+    <string name="network_username">网络用户</string>
+    <string name="network_password">网络密码</string>
+    <string-array name="network_protocols">
+        <item>sftp</item>
+    </string-array>
+</resources>
