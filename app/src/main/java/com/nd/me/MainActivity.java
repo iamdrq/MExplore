@@ -1,22 +1,15 @@
 package com.nd.me;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 
 import android.os.Environment;
-import android.provider.CallLog;
-import android.provider.Telephony;
-import android.text.InputType;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.*;
 import android.widget.*;
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
