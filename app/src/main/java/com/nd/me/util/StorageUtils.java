@@ -181,6 +181,16 @@ public class StorageUtils {
         return url.endsWith(".wav") || url.endsWith(".wma") || url.endsWith(".mp3") || url.endsWith(".flac") || url.endsWith(".ogg");
     }
 
+    public static boolean isSubtitle(String url) {
+        url = url.toLowerCase();
+        return url.endsWith(".srt")
+                || url.endsWith(".ass")
+                || url.endsWith(".ssa")
+                || url.endsWith(".vtt")
+                || url.endsWith(".sub")
+                || url.endsWith(".ttml");
+    }
+
     public static void paste(IFileItem toFileItem, PasteListener pasteListener) {
         if (PASTE_FILE_ITEMS.isEmpty()) {
             return;

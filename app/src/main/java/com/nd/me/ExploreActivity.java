@@ -43,6 +43,9 @@ import java.util.concurrent.Executors;
 
 public class ExploreActivity extends AppCompatActivity {
 
+    public static final String EXTRA_SELECT_SUBTITLE = "select_subtitle";
+    public static final String EXTRA_SELECTED_URL = "selected_url";
+
     private RecyclerView recyclerView;
     private LinearLayoutManager layoutManager;
     private SwipeRefreshLayout swipeRefresh;
@@ -62,6 +65,7 @@ public class ExploreActivity extends AppCompatActivity {
     private final ExecutorService executorService = Executors.newFixedThreadPool(1);
 
     private int requestId = 0;
+    private boolean selectSubtitleMode = false;
 
     MaterialToolbar toolbar;
     TextView toolbarTitle;
@@ -81,6 +85,7 @@ public class ExploreActivity extends AppCompatActivity {
         });
 
         url = getIntent().getStringExtra("url");
+        selectSubtitleMode = getIntent().getBooleanExtra(EXTRA_SELECT_SUBTITLE, false);
         try {
             currentPath = new SimpleURI(url).getPath();
             baseUrl = url.replace(currentPath, "");
@@ -324,6 +329,9 @@ public class ExploreActivity extends AppCompatActivity {
             executorService.execute(() -> {
                 try {
                     currentFileList = fileProvider.listFiles(path);
+                    if (selectSubtitleMode) {
+                        currentFileList.removeIf(file -> !file.isDirectory() && !StorageUtils.isSubtitle(file.getPath()));
+                    }
                     FileSorter.sort(currentFileList, currentSortType);
 
                     runOnUiThread(() -> {
@@ -337,6 +345,13 @@ public class ExploreActivity extends AppCompatActivity {
                             if (file.isDirectory()) {
                                 showFiles(file.getPath());
                             } else {
+                                if (selectSubtitleMode) {
+                                    Intent result = new Intent();
+                                    result.putExtra(EXTRA_SELECTED_URL, file.getUrl());
+                                    setResult(RESULT_OK, result);
+                                    finish();
+                                    return;
+                                }
                                 if (StorageUtils.isVideo(file.getPath()) | StorageUtils.isMusic(file.getPath())) {
                                     Intent intent = new Intent(ExploreActivity.this, VideoActivity.class);
                                     intent.putExtra("url", file.getUrl());

@@ -14,6 +14,9 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -22,6 +25,7 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import com.google.android.material.slider.Slider;
+import com.nd.me.util.SimpleURI;
 import com.nd.me.util.StorageUtils;
 import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.Media;
@@ -31,7 +35,9 @@ import org.videolan.libvlc.util.VLCVideoLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class VideoActivity extends AppCompatActivity {
 
@@ -43,6 +49,7 @@ public class VideoActivity extends AppCompatActivity {
     private LibVLC mLibVLC = null;
     private MediaPlayer mMediaPlayer = null;
     String currentUrl = null;
+    private final Set<String> loadedSubtitleUrls = new HashSet<>();
 
     Slider seekBar;
 
@@ -60,6 +67,17 @@ public class VideoActivity extends AppCompatActivity {
     private boolean userLockedOrientation = false;
     private boolean repeat = false;
     boolean wasPlaying = true;
+    private final ActivityResultLauncher<Intent> subtitlePickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() != RESULT_OK || result.getData() == null) {
+                    return;
+                }
+                String subtitleUrl = result.getData().getStringExtra(ExploreActivity.EXTRA_SELECTED_URL);
+                if (subtitleUrl == null || subtitleUrl.isEmpty()) {
+                    return;
+                }
+                loadExternalSubtitle(subtitleUrl);
+            });
 
     public enum OrientationMode {
 
@@ -361,8 +379,9 @@ public class VideoActivity extends AppCompatActivity {
         popupMenu.setOnMenuItemClickListener(item -> {
             if (item.getGroupId() == 0) {
                 Intent intent = new Intent(VideoActivity.this, ExploreActivity.class);
-                intent.putExtra("url", this.currentUrl.replace(videoTitle.getText(),""));
-                startActivityForResult(intent,1);
+                intent.putExtra("url", getSubtitleBrowseUrl());
+                intent.putExtra(ExploreActivity.EXTRA_SELECT_SUBTITLE, true);
+                subtitlePickerLauncher.launch(intent);
             } else if (item.getGroupId() == 1) {
                 mMediaPlayer.setSpuTrack(item.getItemId());
             }
@@ -370,6 +389,35 @@ public class VideoActivity extends AppCompatActivity {
         });
 
         popupMenu.show();
+    }
+
+    private String getSubtitleBrowseUrl() {
+        try {
+            SimpleURI simpleURI = new SimpleURI(currentUrl);
+            String path = simpleURI.getPath();
+            if (path == null || path.isEmpty()) {
+                return currentUrl;
+            }
+            int lastSlash = path.lastIndexOf('/');
+            if (lastSlash <= 0) {
+                return currentUrl;
+            }
+            return currentUrl.substring(0, currentUrl.length() - path.length()) + path.substring(0, lastSlash);
+        } catch (Exception ignored) {
+            return currentUrl;
+        }
+    }
+    private void loadExternalSubtitle(String subtitleUrl) {
+        if (loadedSubtitleUrls.contains(subtitleUrl)) {
+            Toast.makeText(this, R.string.subtitle_already_added, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Uri subtitleUri = Uri.parse(subtitleUrl);
+        boolean loaded = mMediaPlayer.addSlave(IMedia.Slave.Type.Subtitle, subtitleUri, true);
+        if (loaded) {
+            loadedSubtitleUrls.add(subtitleUrl);
+        }
+        Toast.makeText(this, loaded ? R.string.subtitle_loaded : R.string.subtitle_load_failed, Toast.LENGTH_SHORT).show();
     }
 
     private void setVideoScale(MediaPlayer.ScaleType s) {

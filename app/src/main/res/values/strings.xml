@@ -25,6 +25,9 @@
     <string name="network_path">网络路径</string>
     <string name="network_username">网络用户</string>
     <string name="network_password">网络密码</string>
+    <string name="subtitle_loaded">字幕加载成功</string>
+    <string name="subtitle_load_failed">字幕加载失败</string>
+    <string name="subtitle_already_added">该字幕已添加</string>
     <string-array name="network_protocols">
         <item>sftp</item>
     </string-array>
